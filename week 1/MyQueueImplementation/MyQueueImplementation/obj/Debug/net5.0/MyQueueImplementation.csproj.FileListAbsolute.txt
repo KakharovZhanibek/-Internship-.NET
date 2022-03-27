@@ -1,0 +1,12 @@
+C:\Users\Zhanibek\source\repos\MyQueueImplementation\MyQueueImplementation\obj\Debug\net5.0\MyQueueImplementation.csproj.AssemblyReference.cache
+C:\Users\Zhanibek\source\repos\MyQueueImplementation\MyQueueImplementation\obj\Debug\net5.0\MyQueueImplementation.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Zhanibek\source\repos\MyQueueImplementation\MyQueueImplementation\obj\Debug\net5.0\MyQueueImplementation.AssemblyInfoInputs.cache
+C:\Users\Zhanibek\source\repos\MyQueueImplementation\MyQueueImplementation\obj\Debug\net5.0\MyQueueImplementation.AssemblyInfo.cs
+C:\Users\Zhanibek\source\repos\MyQueueImplementation\MyQueueImplementation\obj\Debug\net5.0\MyQueueImplementation.csproj.CoreCompileInputs.cache
+C:\Users\Zhanibek\source\repos\MyQueueImplementation\MyQueueImplementation\bin\Debug\net5.0\MyQueueImplementation.deps.json
+C:\Users\Zhanibek\source\repos\MyQueueImplementation\MyQueueImplementation\bin\Debug\net5.0\MyQueueImplementation.dll
+C:\Users\Zhanibek\source\repos\MyQueueImplementation\MyQueueImplementation\bin\Debug\net5.0\ref\MyQueueImplementation.dll
+C:\Users\Zhanibek\source\repos\MyQueueImplementation\MyQueueImplementation\bin\Debug\net5.0\MyQueueImplementation.pdb
+C:\Users\Zhanibek\source\repos\MyQueueImplementation\MyQueueImplementation\obj\Debug\net5.0\MyQueueImplementation.dll
+C:\Users\Zhanibek\source\repos\MyQueueImplementation\MyQueueImplementation\obj\Debug\net5.0\ref\MyQueueImplementation.dll
+C:\Users\Zhanibek\source\repos\MyQueueImplementation\MyQueueImplementation\obj\Debug\net5.0\MyQueueImplementation.pdb
