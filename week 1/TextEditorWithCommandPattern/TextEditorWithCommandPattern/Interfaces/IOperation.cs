@@ -9,6 +9,7 @@ namespace TextEditorWithCommandPattern.Interfaces
     interface IOperation
     {
         void Execute();
-        bool IsComplete { get; }
+        void Undo();
+        void Redo();
     }
 }

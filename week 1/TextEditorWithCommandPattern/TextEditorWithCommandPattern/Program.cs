@@ -1,4 +1,5 @@
 ﻿using System;
+using TextEditorWithCommandPattern.Classes;
 
 namespace TextEditorWithCommandPattern
 {
@@ -17,14 +18,47 @@ namespace TextEditorWithCommandPattern
             textEditor.InsertChar('e');
             textEditor.InsertChar('!');
 
+            textEditor.InsertChar('H');
+            textEditor.InsertChar('e');
+            textEditor.InsertChar('l');
+            textEditor.InsertChar('l');
+            textEditor.InsertChar('o');
+            textEditor.InsertChar(' ');
+            textEditor.InsertChar('W');
+            textEditor.InsertChar('o');
+            textEditor.InsertChar('r');
+            textEditor.InsertChar('l');
+            textEditor.InsertChar('d');
+            textEditor.InsertChar('!');
+
             foreach (string stringString in textEditor.Text)
             {
                 Console.WriteLine(stringString);
             }
-            Console.WriteLine(" focus  "+textEditor.Text[5][19]);
 
-            textEditor.DeleteChar();
+            textEditor.Undo();
+            textEditor.Undo();
+            textEditor.Undo();
 
+            foreach (string stringString in textEditor.Text)
+            {
+                Console.WriteLine(stringString);
+            }
+            textEditor.InsertChar('d');
+            textEditor.InsertChar('!');
+
+            textEditor.Redo();
+            textEditor.Redo();
+            textEditor.Redo();
+            foreach (string stringString in textEditor.Text)
+            {
+                Console.WriteLine(stringString);
+            }
+
+            textEditor.Undo();
+            textEditor.Undo();
+            textEditor.Undo();
+            // textEditor.InsertChar('!');
             foreach (string stringString in textEditor.Text)
             {
                 Console.WriteLine(stringString);
