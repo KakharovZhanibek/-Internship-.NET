@@ -13,9 +13,8 @@ namespace TrainingCenter.Interfaces
         ITeacher CourseTeacher { get; set; }
         List<IStudent> CourseStudents { get; set; }
         List<Lesson> Lessons { get; set; }
+        public Dictionary<IStudent, int?> StudentsCourseFinalRate { get; set; }
 
-        void AddStudentToCourse(IStudent student);
-        void AssignTeacherToCourse(ITeacher teacher);
-        Dictionary<string, int?> GetStudentsLessonsScores(IStudent student);
+        Dictionary<string, int> GetStudentsLessonsScores(IStudent student);
     }
 }

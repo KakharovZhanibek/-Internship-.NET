@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace TrainingCenter.Interfaces
 {
-    public interface IStudent:IPerson
+    public interface IStudent : IPerson
     {
         List<ICourse> Courses { get; set; }
-        void SignUpForCourse(ICourse course);
-        Dictionary<string, int?> ShowScoresOfCourseLessons(ICourse course);
+        Dictionary<string, int> ShowScoresOfCourseLessons(ICourse course);
     }
 }

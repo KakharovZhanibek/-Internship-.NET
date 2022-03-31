@@ -10,8 +10,6 @@ namespace TrainingCenter.Interfaces
     public interface ITeacher:IPerson
     {
         List<ICourse> Courses { get; set; }
-
-        void AddCourseToTeacher(ICourse course);
-        void AddLessonToCourse(Lesson lesson,ICourse course);
+        void GiveMarkToLesson(ICourse course, IStudent student, Lesson lesson, int score);
     }
 }

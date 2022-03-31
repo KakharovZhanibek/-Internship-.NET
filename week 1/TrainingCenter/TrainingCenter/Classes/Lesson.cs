@@ -10,13 +10,12 @@ namespace TrainingCenter.Classes
     public class Lesson
     {
         public string LessonTitle { get; set; }
-        //IPerson teacher;
-        public Dictionary<IStudent, int?> StudentsLessonsResults;
+        public Dictionary<IStudent, int> StudentsLessonsResults;
 
-        public Lesson(string lessonTitle, Dictionary<IStudent, int?> studentsLessonsResults)
+        public Lesson(string lessonTitle)
         {
             LessonTitle = lessonTitle;
-            StudentsLessonsResults = studentsLessonsResults;
+            StudentsLessonsResults = new Dictionary<IStudent, int>();
         }
     }
 }
