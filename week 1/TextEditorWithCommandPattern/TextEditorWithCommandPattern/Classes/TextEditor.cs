@@ -49,7 +49,6 @@ namespace TextEditorWithCommandPattern.Classes
         {
             if (UndoOperations.Any())
                 UndoOperations.Peek().Undo();
-
         }
         public void Redo()
         {
