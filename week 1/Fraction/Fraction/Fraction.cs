@@ -14,47 +14,42 @@ namespace Fraction
         {
             if (denomirator == 0)
                 throw new DivideByZeroException();
-            if (numerator == 0)
-                throw new ArgumentException();
 
             this.numerator = numerator;
             this.denomirator = denomirator;
         }
 
-        public Fraction Addition(Fraction fraction)
+        public static Fraction operator +(Fraction fractionA, Fraction fractionB)
         {
             Fraction resultFraction = Normalization(
-                this.numerator * fraction.denomirator + fraction.numerator * this.denomirator, 
-                this.denomirator * fraction.denomirator
+                fractionA.numerator * fractionB.denomirator + fractionB.numerator * fractionA.denomirator,
+                fractionA.denomirator * fractionB.denomirator
                 );
 
             return resultFraction;
         }
-        public Fraction Difference(Fraction fraction)
+        public static Fraction operator -(Fraction fractionA, Fraction fractionB)
         {
-            if (this.Equals(fraction))
-                return new Fraction(0, 1);
-
             Fraction resultFraction = Normalization(
-                this.numerator * fraction.denomirator - fraction.numerator * this.denomirator,
-                this.denomirator * fraction.denomirator
+                fractionA.numerator * fractionB.denomirator - fractionB.numerator * fractionA.denomirator,
+                fractionA.denomirator * fractionB.denomirator
                 );
 
             return resultFraction;
         }
-        public Fraction Multiplication(Fraction fraction)
+        public static Fraction operator *(Fraction fractionA,Fraction fractionB)
         {
             Fraction resultFraction = Normalization(
-                this.numerator * fraction.numerator,
-                this.denomirator * fraction.denomirator
+                fractionA.numerator * fractionB.numerator,
+                fractionA.denomirator * fractionB.denomirator
                 );
             return resultFraction;
         }
-        public Fraction Division(Fraction fraction)
+        public static Fraction operator /(Fraction fractionA,Fraction fractionB)
         {
             Fraction resultFraction = Normalization(
-                this.numerator * fraction.denomirator,
-                this.denomirator * fraction.numerator
+                fractionA.numerator * fractionB.denomirator,
+                fractionA.denomirator * fractionB.numerator
                 );
             return resultFraction;
         }
@@ -64,7 +59,7 @@ namespace Fraction
             return (double)numerator / denomirator;
         }
 
-        public Fraction Normalization(int numerator,int denomirator)
+        public static Fraction Normalization(int numerator, int denomirator)
         {
             return new Fraction(
                 numerator / GetCommonDivisor(numerator, denomirator),
@@ -84,7 +79,7 @@ namespace Fraction
 
         public override int GetHashCode()
         {
-            return numerator.GetHashCode()^
+            return numerator.GetHashCode() ^
                 denomirator.GetHashCode();
         }
 
