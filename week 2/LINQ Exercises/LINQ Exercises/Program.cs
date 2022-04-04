@@ -1,13 +1,29 @@
 ﻿using LINQ_Exercises.Classes;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LINQ_Exercises
 {
+    public class Person
+    {
+        public string Name { get; set; }
+        public int Age { get; set; }
+    }
     class Program
     {
         static void Main(string[] args)
         {
+            Person[] people = new[] {
+                new Person() { Name = "Haley", Age = 20 },
+                new Person() { Name = "John", Age = 25 },
+                new Person() { Name = "Stan", Age = 21 },
+                new Person() { Name = "Gia", Age = 25 }
+            };
+            Console.WriteLine(people.Max(p=>p.Age));
+
+            return;
+
             PurchaseService purchaseService = new PurchaseService();
 
             Product product1 = new Product() { ArticleNumber = "a", Category = "Electronic", CountryOfOrigin = "China" };
@@ -71,178 +87,162 @@ namespace LINQ_Exercises
             purchaseService.AddProductToStore(product7, "Store2", 2020);
             purchaseService.AddProductToStore(product8, "Store3", 30000);
 
-            purchaseService.Buy(consumer3, product1, "Store1");
-            purchaseService.Buy(consumer3, product2, "Store2");
+            //purchaseService.Buy(consumer3, product1, "Store1");
+            //purchaseService.Buy(consumer3, product2, "Store2");
 
 
-            //purchaseService.StartActivityImitation();
+            purchaseService.StartActivityImitation();
+
+            
+            var anonType = new
+            {
+                ConsumerCode = 0,
+                ProductArticleNumber = "",
+                StoreName = "",
+                Discount = 0
+            };
+
+            var list = new[] { anonType }.ToList();
+            list.Clear();
 
             foreach (var item in purchaseService.purchaseInfos)
             {
-                Console.WriteLine("{0}\n{1}\n{2}\n", item.ConsumerCode, item.ProductArticleNumber, item.StoreName);
+                if (!purchaseService.consumersStores.Exists(x => x.ConsumerCode == item.ConsumerCode && x.StoreName == item.StoreName))
+                {
+                    list.Add(new
+                    {
+                        ConsumerCode = item.ConsumerCode,
+                        ProductArticleNumber = item.ProductArticleNumber,
+                        StoreName = item.StoreName,
+                        Discount = 0
+                    });
+                }
+                else
+                {
+                    list.Add(new
+                    {
+                        ConsumerCode = item.ConsumerCode,
+                        ProductArticleNumber = item.ProductArticleNumber,
+                        StoreName = item.StoreName,
+                        Discount = purchaseService.consumersStores.Find(x => x.ConsumerCode == item.ConsumerCode && x.StoreName == item.StoreName).Discount
+                    });
+                }
             }
 
-            //var temp1 = purchaseService.purchaseInfos
-            //    .Join(purchaseService.consumersStores,
-            //    pi => pi.ConsumerCode,
-            //    sp => sp.ConsumerCode,
-            //    (pi, sp) => new
-            //    {
-            //        ConsumerCode = pi.ConsumerCode,
-            //        ProductArticleNumber = pi.ProductArticleNumber,
-            //        StoreName = sp.StoreName,
-            //        Discount = sp.Discount
-            //    });
-            
-            var test = from pi in purchaseService.purchaseInfos
-                       join cs in purchaseService.consumersStores
-                           on new { pi.ConsumerCode, pi.StoreName } equals new { cs.ConsumerCode, cs.StoreName }
-                       select new
-                       {
-                           ConsumerCode = pi.ConsumerCode,
-                           ProductArticleNumber = pi.ProductArticleNumber,
-                           StoreName = pi.StoreName,
-                           Discount = cs.Discount
-                       };
+            #region Linq like SQL
+            //var test = from pi in purchaseService.purchaseInfos
+            //           join cs in purchaseService.consumersStores
+            //               on new { pi.ConsumerCode, pi.StoreName } equals new { cs.ConsumerCode, cs.StoreName }
+            //           select new
+            //           {
+            //               ConsumerCode = pi.ConsumerCode,
+            //               ProductArticleNumber = pi.ProductArticleNumber,
+            //               StoreName = pi.StoreName,
+            //               Discount = cs.Discount
+            //           };
+
+            #endregion
+
+            var temp1 = list.Join(purchaseService.products,
+                current => current.ProductArticleNumber,
+                p => p.ArticleNumber,
+                (current, p) => new
+                {
+                    ConsumerCode = current.ConsumerCode,
+                    ProductArticleNumber = current.ProductArticleNumber,
+                    StoreName = current.StoreName,
+                    Discount = current.Discount,
+                    ProductCategory = p.Category,
+                    MadeIn = p.CountryOfOrigin
+                });
 
 
-            //var temp2 = temp1.Join(purchaseService.products,
-            //    current => current.ProductArticleNumber,
-            //    p => p.ArticleNumber,
-            //    (current, p) => new
-            //    {
-            //        ConsumerCode = current.ConsumerCode,
-            //        ProductArticleNumber = current.ProductArticleNumber,
-            //        StoreName = current.StoreName,
-            //        Discount = current.Discount,
-            //        ProductCategory = p.Category,
-            //        MadeIn = p.CountryOfOrigin
-            //    });
+            var temp2 = temp1.Join(purchaseService.consumers,
+                current => current.ConsumerCode,
+                c => c.ConsumerCode,
+                (current, c) => new
+                {
+                    ConsumerCode = current.ConsumerCode,
+                    ProductArticleNumber = current.ProductArticleNumber,
+                    StoreName = current.StoreName,
+                    Discount = current.Discount,
+                    ProductCategory = current.ProductCategory,
+                    MadeIn = current.MadeIn,
+                    YearOfBirth = c.YearOfBirth,
+                    Address = c.Address
+                });
 
-            foreach (var item in test)
+            var temp3 = from current in temp2
+                        join sp in purchaseService.storesProducts
+                            on new { current.ProductArticleNumber, current.StoreName } equals new { sp.ProductArticleNumber, sp.StoreName }
+                        select new
+                        {
+                            ConsumerCode = current.ConsumerCode,
+                            YearOfBirth = current.YearOfBirth,
+                            Address = current.Address,
+                            ProductArticleNumber = current.ProductArticleNumber,
+                            ProductCategory = current.ProductCategory,
+                            MadeIn = current.MadeIn,
+                            StoreName = current.StoreName,
+                            ProductPrice = sp.ProductPrice,
+                            Discount = current.Discount
+                        };
+
+            foreach (var item in temp3)
             {
-                Console.WriteLine(
-                    "Consumer code:    {0}\n" +
-                    "Product article:  {1}\n" +
-                    "Store name:       {2}\n" +
-                    "Discount:         {3}\n",
+                Console.WriteLine("Consumer code:    {0}\n" +
+                    "Year of birth:    {1}\n" +
+                    "Consumer address: {2}\n" +
+                    "Product article:  {3}\n" +
+                    "Product category: {4}\n" +
+                    "Made in:          {5}\n" +
+                    "Store name:       {6}\n" +
+                    "Product price:    {7}\n" +
+                    "Consumer discount:{8}\n\n",
                     item.ConsumerCode,
+                    item.YearOfBirth,
+                    item.Address,
                     item.ProductArticleNumber,
+                    item.ProductCategory,
+                    item.MadeIn,
                     item.StoreName,
+                    item.ProductPrice,
                     item.Discount);
             }
-            return;
 
+            Console.WriteLine("----------------------------------------------------");
+            Console.WriteLine("----------------------------------------------------");
+            Console.WriteLine("----------------------------------------------------");
+            var groupbyStorname = temp3.GroupBy(t => new
+            {
+                t.StoreName,
+                t.MadeIn,
+                t.ConsumerCode
+            })
+            .Select(x => new
+            {
+                MadeIn = x.Key.MadeIn,
+                StoreName = x.Key.StoreName,
+                YearOfBirth = x.Max(e => e.YearOfBirth),
+                ConsumerCode = x.Key.ConsumerCode,
+                TotalSumOfAllPurchases = x.Sum(s => (s.ProductPrice - s.ProductPrice * s.Discount / 100))
+            }).ToList();
 
-
-            //var temp2 = purchaseService.purchaseInfos.Join(purchaseService.consumers,
-            //    pi => pi.ConsumerCode,
-            //    c => c.ConsumerCode,
-            //    (pi, c) => new
-            //    {
-            //        ConsumerCode = pi.ConsumerCode,
-            //        ProductArticleNumber = pi.ProductArticleNumber,
-            //        StoreName = pi.StoreName,
-            //        YearOfBirth = c.YearOfBirth,
-            //        Address = c.Address
-            //    });
-            //#region 2
-            ///*   var temptemp = temp2.Join(purchaseService.consumersStores,
-            //       current => current.ConsumerCode,
-            //       cs => cs.ConsumerCode,
-            //       (current, cs) => new
-            //       {
-            //           ConsumerCode = current.ConsumerCode,
-            //           ConsumerAddress = current.Address,
-            //           YearOfBirth = current.YearOfBirth,
-            //           ProductArticleNumber = current.ProductArticleNumber,
-            //           StoreName = current.StoreName,
-            //           Discount = cs.Discount
-            //       });
-            //   foreach (var item in temptemp)
-            //   {
-            //       Console.WriteLine("Consumer code:    {0}\n" +
-            //           "Year of birth:    {1}\n" +
-            //           "Consumer address: {2}\n" +
-            //           "Store name:       {3}\n" +
-            //           "Product article:  {4}\n" +
-            //           "Consumer discount:{5}\n\n",
-            //           item.ConsumerCode,
-            //           item.YearOfBirth,
-            //           item.ConsumerAddress,
-            //           item.StoreName,
-            //           item.ProductArticleNumber,
-            //           item.Discount);
-            //   }
-            //   return;*/
-
-            //#endregion
-
-            //var temp3 = temp2.Join(purchaseService.products,
-            //    current => current.ProductArticleNumber,
-            //    p => p.ArticleNumber,
-            //    (current, p) => new
-            //    {
-            //        ConsumerCode = current.ConsumerCode,
-            //        YearOfBirth = current.YearOfBirth,
-            //        ConsumerAddress = current.Address,
-            //        StoreName = current.StoreName,
-            //        ProductArticleNumber = current.ProductArticleNumber,
-            //        ProductCategory = p.Category,
-            //        MadeIn = p.CountryOfOrigin
-            //    });
-
-            //var temp4 = temp3.Join(purchaseService.storesProducts,
-            //    current => current.ProductArticleNumber,
-            //    sp => sp.ProductArticleNumber,
-            //    (current, sp) => new
-            //    {
-            //        ConsumerCode = current.ConsumerCode,
-            //        YearOfBirth = current.YearOfBirth,
-            //        ConsumerAddress = current.ConsumerAddress,
-            //        StoreName = current.StoreName,
-            //        ProductArticleNumber = current.ProductArticleNumber,
-            //        ProductCategory = current.ProductCategory,
-            //        MadeIn = current.MadeIn,
-            //        ProductPrice = sp.ProductPrice
-            //    });
-            //var temp5 = temp4.Join(purchaseService.consumersStores,
-            //    current => current.ConsumerCode,
-            //    cs => cs.ConsumerCode,
-            //    (current, cs) => new
-            //    {
-            //        ConsumerCode = current.ConsumerCode,
-            //        YearOfBirth = current.YearOfBirth,
-            //        ConsumerAddress = current.ConsumerAddress,
-            //        StoreName = current.StoreName,
-            //        ProductArticleNumber = current.ProductArticleNumber,
-            //        ProductCategory = current.ProductCategory,
-            //        MadeIn = current.MadeIn,
-            //        ProductPrice = current.ProductPrice,
-            //        ConsumerDiscount = cs.Discount
-            //    });
-
-            //foreach (var item in temp5)
-            //{
-            //    Console.WriteLine("Consumer code:    {0}\n" +
-            //        "Year of birth:    {1}\n" +
-            //        "Consumer address: {2}\n" +
-            //        "Store name:       {3}\n" +
-            //        "Product article:  {4}\n" +
-            //        "Product category: {5}\n" +
-            //        "Made in:          {6}\n" +
-            //        "Product price:    {7}\n" +
-            //        "Consumer discount:{8}\n\n",
-            //        item.ConsumerCode,
-            //        item.YearOfBirth,
-            //        item.ConsumerAddress,
-            //        item.StoreName,
-            //        item.ProductArticleNumber,
-            //        item.ProductCategory,
-            //        item.MadeIn,
-            //        item.ProductPrice,
-            //        item.ConsumerDiscount);
-            //}
+            foreach (var item in groupbyStorname)
+            {
+                    Console.WriteLine("\nMade in:          {0}\n"+
+                    "Store Name:       {1}\n" +
+                    "Year of birth:    {2}\n" +
+                    "Consumer code:    {3}\n" +
+                    "TotalSumOfAllPurchases: {4}\n\n",
+                    item.MadeIn,
+                    item.StoreName,
+                    item.YearOfBirth,
+                    item.ConsumerCode,
+                    item.TotalSumOfAllPurchases
+                   );
+            }
         }
     }
 }
+

@@ -9,7 +9,7 @@ namespace LINQ_Exercises.Classes
 {
     class Product
     {
-        [RegularExpression(@"[A-Z]{2}[0-9]{3}-[0-9]{4}$",
+        [RegularExpression(@"^[A-Z]{2}[0-9]{3}-[0-9]{4}$",
             ErrorMessage = "Not allowed article")]
         public string ArticleNumber { get; set; }
         public string Category { get; set; }
