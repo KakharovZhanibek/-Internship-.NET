@@ -5,25 +5,10 @@ using System.Linq;
 
 namespace LINQ_Exercises
 {
-    public class Person
-    {
-        public string Name { get; set; }
-        public int Age { get; set; }
-    }
     class Program
     {
         static void Main(string[] args)
         {
-            Person[] people = new[] {
-                new Person() { Name = "Haley", Age = 20 },
-                new Person() { Name = "John", Age = 25 },
-                new Person() { Name = "Stan", Age = 21 },
-                new Person() { Name = "Gia", Age = 25 }
-            };
-            Console.WriteLine(people.Max(p=>p.Age));
-
-            return;
-
             PurchaseService purchaseService = new PurchaseService();
 
             Product product1 = new Product() { ArticleNumber = "a", Category = "Electronic", CountryOfOrigin = "China" };
@@ -213,6 +198,9 @@ namespace LINQ_Exercises
             Console.WriteLine("----------------------------------------------------");
             Console.WriteLine("----------------------------------------------------");
             Console.WriteLine("----------------------------------------------------");
+
+            //Task LINQ---------------------
+
             var groupbyStorname = temp3.GroupBy(t => new
             {
                 t.StoreName,
@@ -227,6 +215,8 @@ namespace LINQ_Exercises
                 ConsumerCode = x.Key.ConsumerCode,
                 TotalSumOfAllPurchases = x.Sum(s => (s.ProductPrice - s.ProductPrice * s.Discount / 100))
             }).ToList();
+
+            //Task LINQ---------------------
 
             foreach (var item in groupbyStorname)
             {
