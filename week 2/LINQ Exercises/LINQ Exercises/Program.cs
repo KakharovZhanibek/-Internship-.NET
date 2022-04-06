@@ -21,6 +21,7 @@ namespace LINQ_Exercises
             Product product8 = new Product() { ArticleNumber = "h", Category = "Watch", CountryOfOrigin = "USA" };
 
             Consumer consumer1 = new Consumer() { ConsumerCode = 1, YearOfBirth = 2002, Address = "st.12" };
+            Consumer consumer111 = new Consumer() { ConsumerCode = 111, YearOfBirth = 2002, Address = "st.111" };
             Consumer consumer2 = new Consumer() { ConsumerCode = 2, YearOfBirth = 1997, Address = "st.11" };
             Consumer consumer3 = new Consumer() { ConsumerCode = 3, YearOfBirth = 1985, Address = "st.97" };
             Consumer consumer4 = new Consumer() { ConsumerCode = 4, YearOfBirth = 1972, Address = "st.46" };
@@ -38,9 +39,13 @@ namespace LINQ_Exercises
             purchaseService.AddConsumer(consumer2);
             purchaseService.AddConsumer(consumer3);
             purchaseService.AddConsumer(consumer4);
+            purchaseService.AddConsumer(consumer111);
 
             purchaseService.AddDiscountInStoreForConsumer(consumer1, "Store1", 20);
             purchaseService.AddDiscountInStoreForConsumer(consumer1, "Store2", 10);
+
+            purchaseService.AddDiscountInStoreForConsumer(consumer111, "Store1", 25);
+            purchaseService.AddDiscountInStoreForConsumer(consumer111, "Store2", 30);
 
             purchaseService.AddDiscountInStoreForConsumer(consumer2, "Store1", 5);
             purchaseService.AddDiscountInStoreForConsumer(consumer2, "Store2", 30);
@@ -78,7 +83,7 @@ namespace LINQ_Exercises
 
             purchaseService.StartActivityImitation();
 
-            
+
             var anonType = new
             {
                 ConsumerCode = 0,
@@ -113,20 +118,6 @@ namespace LINQ_Exercises
                     });
                 }
             }
-
-            #region Linq like SQL
-            //var test = from pi in purchaseService.purchaseInfos
-            //           join cs in purchaseService.consumersStores
-            //               on new { pi.ConsumerCode, pi.StoreName } equals new { cs.ConsumerCode, cs.StoreName }
-            //           select new
-            //           {
-            //               ConsumerCode = pi.ConsumerCode,
-            //               ProductArticleNumber = pi.ProductArticleNumber,
-            //               StoreName = pi.StoreName,
-            //               Discount = cs.Discount
-            //           };
-
-            #endregion
 
             var temp1 = list.Join(purchaseService.products,
                 current => current.ProductArticleNumber,
@@ -173,7 +164,8 @@ namespace LINQ_Exercises
                             Discount = current.Discount
                         };
 
-            foreach (var item in temp3)
+            Console.WriteLine("Before LINQ");
+            foreach (var item in temp3.OrderBy(o => o.MadeIn).ThenBy(o => o.StoreName).ThenBy(o => o.ConsumerCode))
             {
                 Console.WriteLine("Consumer code:    {0}\n" +
                     "Year of birth:    {1}\n" +
@@ -199,38 +191,64 @@ namespace LINQ_Exercises
             Console.WriteLine("----------------------------------------------------");
             Console.WriteLine("----------------------------------------------------");
 
-            //Task LINQ---------------------
-
-            var groupbyStorname = temp3.GroupBy(t => new
-            {
-                t.StoreName,
-                t.MadeIn,
-                t.ConsumerCode
-            })
-            .Select(x => new
-            {
-                MadeIn = x.Key.MadeIn,
-                StoreName = x.Key.StoreName,
-                YearOfBirth = x.Max(e => e.YearOfBirth),
-                ConsumerCode = x.Key.ConsumerCode,
-                TotalSumOfAllPurchases = x.Sum(s => (s.ProductPrice - s.ProductPrice * s.Discount / 100))
-            }).ToList();
 
             //Task LINQ---------------------
 
-            foreach (var item in groupbyStorname)
+            var resultSequence = temp3
+                                        .OrderBy(o => o.MadeIn)
+                                        .ThenBy(o => o.StoreName)
+                                        .ThenBy(o => o.ConsumerCode)
+                                        .GroupBy(t => new
+                                        {
+                                            t.StoreName,
+                                            t.MadeIn,
+                                        })
+                                        .SelectMany(sm => sm.Where(w => w.YearOfBirth == sm.Max(m => m.YearOfBirth)).Select(s => new
+                                        {
+                                            MadeIn = s.MadeIn,
+                                            StoreName = s.StoreName,
+                                            YearOfBirth = s.YearOfBirth, /* x.Max(e => e.YearOfBirth),*/
+                                            ConsumerCode = s.ConsumerCode,
+                                            ProductArticleNumber = s.ProductArticleNumber,
+                                            ProductCategory = s.ProductCategory,
+                                            ProductPrice = s.ProductPrice,
+                                            Discount = s.Discount,
+                                        }))
+                                        .GroupBy(gr => new
+                                        {
+                                            gr.StoreName,
+                                            gr.MadeIn,
+                                            gr.ConsumerCode
+                                        })
+                                        .Select(x => new
+                                        {
+                                            MadeIn = x.Key.MadeIn,
+                                            StoreName = x.Key.StoreName,
+                                            YearOfBirth = x.FirstOrDefault(f => f.ConsumerCode == x.Key.ConsumerCode).YearOfBirth,
+                                            ConsumerCode = x.Key.ConsumerCode,
+                                            Discount = x.FirstOrDefault(f => f.ConsumerCode == x.Key.ConsumerCode).Discount,
+                                            TotalSumOfAllPurchases = x.Sum(s => s.ProductPrice - s.ProductPrice * s.Discount / 100)
+                                        });
+
+
+            Console.WriteLine("\nAfter LINQ\n");
+
+            foreach (var item in resultSequence)
             {
-                    Console.WriteLine("\nMade in:          {0}\n"+
-                    "Store Name:       {1}\n" +
-                    "Year of birth:    {2}\n" +
-                    "Consumer code:    {3}\n" +
-                    "TotalSumOfAllPurchases: {4}\n\n",
-                    item.MadeIn,
-                    item.StoreName,
-                    item.YearOfBirth,
-                    item.ConsumerCode,
-                    item.TotalSumOfAllPurchases
-                   );
+                Console.WriteLine(
+                                    "\nMade in:          {0}\n" +
+                                    "Store Name:       {1}\n" +
+                                    "   Consumer code:     {2}\n" +
+                                    "   Year of birth:     {3}\n" +
+                                    "   Discount:          {4} %\n"+
+                                    "   SumOfAllPurchases: {5}\n\n",
+                                    item.MadeIn,
+                                    item.StoreName,
+                                    item.ConsumerCode,
+                                    item.YearOfBirth,
+                                    item.Discount,
+                                    item.TotalSumOfAllPurchases
+               );
             }
         }
     }
