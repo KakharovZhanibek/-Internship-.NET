@@ -30,6 +30,7 @@ namespace Documentation
                         methodNames.Add(methodInfo.Name);
                 }
             }
+         
             return methodNames.ToArray();
         }
 
