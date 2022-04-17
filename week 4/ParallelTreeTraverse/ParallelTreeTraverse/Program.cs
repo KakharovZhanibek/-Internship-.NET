@@ -31,7 +31,7 @@ namespace ParallelTreeTraverse
         static void DoTree<T>(Tree<T> tree, Action<T> action)
         {
             if (tree == null)
-                return;
+                throw new NullReferenceException();
 
             action(tree.Data);
 
