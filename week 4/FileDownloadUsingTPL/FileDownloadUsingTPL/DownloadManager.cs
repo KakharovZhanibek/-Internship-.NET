@@ -13,11 +13,12 @@ namespace FileDownloadUsingTPL
         private long fileSize;
         private long chunkSize;
         private string? url;
-        private string? folderName;
+        private string? directory;
         private string contentType = "";
-        private Dictionary<int, string> fileChunksPaths = new Dictionary<int, string>();
-        List<Action> workers = new List<Action>();
-        List<Range> ranges = new List<Range>();
+        private Dictionary<int, string> fileChunksPaths;
+        List<Action> workers;
+        List<Range> ranges;
+        private static double downloadPercentage;
         public void GetFileSizeInfo(string url)
         {
             try
@@ -45,9 +46,9 @@ namespace FileDownloadUsingTPL
                 Console.WriteLine("Message :{0}", e.Message);
             }
         }
-        public void MergeFileChunks()
+        private void MergeFileChunks()
         {
-            using (FileStream fs = new FileStream(@"..\DownloadedFiles\" + folderName + "\\FinalFile" + "." + contentType, FileMode.Append, FileAccess.Write))
+            using (FileStream fs = new FileStream(directory + "FinalFile" + "." + contentType, FileMode.Append, FileAccess.Write))
             {
                 foreach (var fileChunkPath in fileChunksPaths.OrderBy(o => o.Key))
                 {
@@ -60,7 +61,8 @@ namespace FileDownloadUsingTPL
 
         private void ParallelDownloadToPath(long start, long count, int fileChunkCounter)
         {
-            Console.WriteLine(Task.CurrentId + "  :  " + start + " | " + count + "  " + fileChunkCounter);
+            fileChunksPaths = new Dictionary<int, string>();
+            //Console.WriteLine(Task.CurrentId + "  :  " + start + " | " + count + "  " + fileChunkCounter);
 
             using (HttpClient httpClient = new HttpClient())
             {
@@ -70,13 +72,14 @@ namespace FileDownloadUsingTPL
                 request.Headers.Range = new RangeHeaderValue(start, count);
                 request.RequestUri = new Uri(url);
 
-                 HttpResponseMessage response= httpClient.Send(request);
-
+                HttpResponseMessage response = httpClient.Send(request);
                 //Console.WriteLine(Task.CurrentId + "  Actual Chunk Size\n" + response.Content.Headers.GetValues("Content-Length").First() + "\n");
 
                 response.EnsureSuccessStatusCode();
 
-                string fileChunkPath = "..\\DownloadedFiles\\" + folderName + "\\" + fileChunkCounter.ToString();
+                downloadPercentage += (double)chunkSize * 100 / fileSize;
+
+                string fileChunkPath = directory + fileChunkCounter.ToString();
 
                 fileChunksPaths.Add(fileChunkCounter, fileChunkPath);
 
@@ -117,14 +120,14 @@ namespace FileDownloadUsingTPL
         //    Task.WaitAll();
         //}
 
-        public void DownloadParallel(string url, int tasksCount)
+        public void Download(string url, int tasksCount)
         {
             GetFileSizeInfo(url);
             FileSlicer(tasksCount);
+            CreateNewFolderToFile();
 
-            folderName = Guid.NewGuid().ToString();
-            string dir = @"..\DownloadedFiles\" + folderName;
-            Directory.CreateDirectory(dir);
+            downloadPercentage = 0;
+            workers = new List<Action>();
 
             int i = 0;
             while (i < tasksCount)
@@ -144,13 +147,33 @@ namespace FileDownloadUsingTPL
                 Action action = new Action(() => ParallelDownloadToPath(testStart, testTo, testCounter));
                 workers.Add(action);
             }
-
+            Task.Factory.StartNew(() => ShowProgressBar());
             Parallel.Invoke(workers.ToArray());
+
             Task.WaitAll();
+
+            MergeFileChunks();
+            PrepareToNewDownload();
         }
-        public void FileSlicer(int tasksCount)
+        private void CreateNewFolderToFile()
         {
+            string folderName = Guid.NewGuid().ToString();
+            directory = @"..\DownloadedFiles\" + folderName + "\\";
+            Directory.CreateDirectory(directory);
+        }
+        private void PrepareToNewDownload()
+        {
+            contentType = "";
+            workers.Clear();
+            fileChunksPaths.Clear();
+            ranges.Clear();
+        }
+        private void FileSlicer(int tasksCount)
+        {
+            ranges = new List<Range>();
+
             chunkSize = fileSize / tasksCount;
+
             long remains;
             long start = 0;
             long to = chunkSize;
@@ -168,6 +191,29 @@ namespace FileDownloadUsingTPL
                 Range range = new Range() { Start = start, To = start + remains - 1 };
                 ranges.Add(range);
             }
+        }
+        private void ShowProgressBar()
+        {
+            int percentage = 0;
+            while (downloadPercentage <= 100)
+            {
+                percentage = (int)downloadPercentage + 1;
+
+                Console.WriteLine($"Downloading.    {percentage}%\n");
+                Console.WriteLine(new string('█', percentage));
+                Thread.Sleep(200);
+                Console.Clear();
+                Console.WriteLine($"Downloading..   {percentage}%\n");
+                Console.WriteLine(new string('█', percentage));
+                Thread.Sleep(200);
+                Console.Clear();
+                Console.WriteLine($"Downloading...  {percentage}%\n");
+                Console.WriteLine(new string('█', percentage));
+                Thread.Sleep(200);
+                Console.Clear();
+            }
+            Console.WriteLine($"Download completed!  100%\n");
+            Console.WriteLine(new string('█', percentage));
         }
     }
 }
