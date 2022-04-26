@@ -30,5 +30,31 @@ namespace ALgorithmTests
             //Assert
             Assert.Throws<ArgumentNullException>(act);
         }
+        [Fact]
+        public void MaxSubArraySum_Array_ReturnsZero()
+        {
+            //Arrange
+            int[] test = { 0, 0, 0, 0, 0, 0 };
+            int expected = 0;
+
+            //Act
+            int actual = AttestationAlgorithm.MaxSubArray(test);
+
+            //Assert
+            Assert.Equal(expected, actual);
+        }
+        [Fact]
+        public void MaxSubArraySum_Array_ReturnsFirstElement()
+        {
+            //Arrange
+            int[] test = { 777 };
+            int expected = 777;
+
+            //Act
+            int actual = AttestationAlgorithm.MaxSubArray(test);
+
+            //Assert
+            Assert.Equal(expected, actual);
+        }
     }
 }

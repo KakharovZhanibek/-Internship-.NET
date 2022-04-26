@@ -15,8 +15,8 @@ namespace ALgorithm
     {
         static void Main()
         {
-            int[] nums = { -2, 1, -3, 4, -1, 2, 1, -5, 4 };
-            int[] test = { -5, -4, -1, -7, -8 };
+            int[] nums = { -26, -12, -31, -40, -9, -6, -8, -5, -10 };
+            int[] test = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             Console.WriteLine(AttestationAlgorithm.MaxSubArray(nums));
         }
     }
@@ -26,8 +26,23 @@ namespace ALgorithm
         {
             if (nums == null)
                 throw new ArgumentNullException();
-            if(nums.Length==1)
+            if (nums.Length == 1)
                 return nums[0];
+
+            bool IsAllZero = true;
+
+            for (int i = 0; i < nums.Length; i++)
+            {
+                if (nums[i] > 0 || nums[i] < 0)
+                {
+                    IsAllZero = false;
+                    break;
+                }
+            }
+            if (IsAllZero)
+            {
+                return 0;
+            }
 
             int sum = int.MinValue;
             int max = 0;
