@@ -9,8 +9,7 @@ namespace HangOutApp
         static void Main(string[] args)
         {
             NightClub nightClub = new NightClub();
-            Thread thread = new Thread(nightClub.StartToHangOut);
-            thread.Start();
+            nightClub.StartMultiThreadHangOut();
         }
     }
 }

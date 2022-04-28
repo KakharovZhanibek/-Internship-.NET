@@ -9,22 +9,27 @@ namespace HangOutApp.Models
 {
     public class Dancer
     {
-        private Dictionary<string, ThreadStart> _howToDance = new Dictionary<string, ThreadStart>();
+        private delegate void PrintInfo();
+        private Dictionary<string, PrintInfo> _howToDance = new Dictionary<string, PrintInfo>();
         public Dancer()
         {
+            _howToDance.Add("Nothing", () => Console.Write("lol"));
             _howToDance.Add("HardBass", () => Console.WriteLine(Thread.CurrentThread.ManagedThreadId + "   Elbow dance!"));
             _howToDance.Add("Rock", () => Console.WriteLine(Thread.CurrentThread.ManagedThreadId + "   Head Shake dance!"));
             _howToDance.Add("Latino", () => Console.WriteLine(Thread.CurrentThread.ManagedThreadId + "   Hips dance!"));
         }
-        public void Dance(string musicType)
+        public void Dance(Music music, ManualResetEvent manualResetEvent)
         {
-            if (!_howToDance.ContainsKey(musicType))
-                LearnToDance(musicType, new Models.Dance() { DanceMoveType = musicType });
-
-            Thread thread = new Thread(_howToDance[musicType]);
-            thread.Start();
+            if (!_howToDance.ContainsKey(music.MusicType))
+                LearnToDance(music.MusicType, new Models.Dance() { DanceMoveType = music.MusicType });
+            while (true)
+            {
+                manualResetEvent.WaitOne();
+                _howToDance[music.MusicType].Invoke();
+                manualResetEvent.Reset();
+            }
         }
-        public void LearnToDance(string musicType, Dance dance)
+        private void LearnToDance(string musicType, Dance dance)
         {
             if (!_howToDance.ContainsKey(musicType))
                 _howToDance.Add(musicType, () => Console.WriteLine(Thread.CurrentThread.ManagedThreadId + "   " + dance.DanceMoveType + " dance!"));

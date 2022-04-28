@@ -17,15 +17,22 @@ namespace HangOutApp.Models
         public DJ ClubDJ;
 
         private Random random = new Random();
+
+        private ManualResetEvent _manualResetEvent;
         public NightClub()
         {
             _dancers = new List<Dancer>();
-            _currentMusic = new Music();
+            _currentMusic = new Music() { MusicType = "Nothing" };
             ClubDJ = new DJ();
-
+            _manualResetEvent = new ManualResetEvent(false);
             DancingPeople();
         }
-        public void StartToHangOut()
+        public void StartMultiThreadHangOut()
+        {
+            Thread startPartyThread = new Thread(StartToHangOut);
+            startPartyThread.Start();
+        }
+        private void StartToHangOut()
         {
             ClubDJ.CreateTrackList(MusicTypes.Types);
 
@@ -36,23 +43,24 @@ namespace HangOutApp.Models
         private void PlayMusicAndDance()
         {
             Console.WriteLine("Start DANCING!");
+
+            _dancers.ForEach(dancer => new Thread(() => dancer.Dance(_currentMusic, _manualResetEvent)).Start());
+
             while (counter < ClubDJ.trackList.Count)
             {
                 ClubDJ.StartNewTrack(counter, _currentMusic);
-
                 Console.WriteLine(_currentMusic.MusicName + "\n" + _currentMusic.MusicType);
-
-                _dancers.ForEach(dancer => dancer.Dance(_currentMusic.MusicType));
-
+                _manualResetEvent.Set();
                 Thread.Sleep(5000);
 
                 counter++;
             }
         }
 
-        public void DancingPeople()
+        private void DancingPeople()
         {
-            for (int i = 0; i < random.Next(5, 20); i++)
+            int rnd = random.Next(5, 20);
+            for (int i = 0; i < rnd; i++)
             {
                 _dancers.Add(new Dancer());
             }
