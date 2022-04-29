@@ -17,7 +17,7 @@ namespace ParallelTreeTraverse
             intTree.Right.Left = new Tree<int>() { Data = 40 };
             intTree.Right.Right = new Tree<int>() { Data = 47 };
 
-            Action<int> action = new Action<int>((a)=> Console.WriteLine(a));
+            Action<int> action = new Action<int>((a) => Console.WriteLine(a));
 
             DoTree<int>(intTree, action);
         }
@@ -30,23 +30,23 @@ namespace ParallelTreeTraverse
 
         static void DoTree<T>(Tree<T> tree, Action<T> action)
         {
-            if (tree == null)
-                throw new NullReferenceException();
-
-            action(tree.Data);
-
-            var left = Task.Factory.StartNew(() => DoTree(tree.Left, action));
-            var right = Task.Factory.StartNew(() => DoTree(tree.Right, action));
-
-            try
+            if (tree != null)
             {
-                Task.WaitAll(left, right);
-            }
-            catch (AggregateException ex)
-            {
-                Console.WriteLine(left.Status);
-                Console.WriteLine(right.Status);
-                Console.WriteLine(ex.Message);
+                action(tree.Data);
+
+                var left = Task.Factory.StartNew(() => DoTree(tree.Left, action));
+                var right = Task.Factory.StartNew(() => DoTree(tree.Right, action));
+
+                try
+                {
+                    Task.WaitAll(left, right);
+                }
+                catch (AggregateException ex)
+                {
+                    Console.WriteLine(left.Status);
+                    Console.WriteLine(right.Status);
+                    Console.WriteLine(ex.Message);
+                }
             }
         }
     }
