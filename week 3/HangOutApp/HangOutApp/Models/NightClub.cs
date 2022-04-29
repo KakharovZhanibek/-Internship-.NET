@@ -13,9 +13,8 @@ namespace HangOutApp.Models
 
         private List<Dancer> _dancers;
         private Music _currentMusic;
-
         public DJ ClubDJ;
-
+        public bool IsTrackListEnded = false;
         private Random random = new Random();
 
         private ManualResetEvent _manualResetEvent;
@@ -38,23 +37,25 @@ namespace HangOutApp.Models
 
             PlayMusicAndDance();
 
-            Console.WriteLine("End Of Party!");
+            Console.WriteLine("\nEnd Of Party!");
         }
         private void PlayMusicAndDance()
         {
             Console.WriteLine("Start DANCING!");
 
-            _dancers.ForEach(dancer => new Thread(() => dancer.Dance(_currentMusic, _manualResetEvent)).Start());
+            _dancers.ForEach(dancer => new Thread(() => dancer.Dance(_currentMusic, _manualResetEvent,ref IsTrackListEnded)).Start());
 
             while (counter < ClubDJ.trackList.Count)
             {
                 ClubDJ.StartNewTrack(counter, _currentMusic);
-                Console.WriteLine(_currentMusic.MusicName + "\n" + _currentMusic.MusicType);
+                Console.WriteLine($"\n{_currentMusic.MusicName} \n {_currentMusic.MusicType}");
                 _manualResetEvent.Set();
-                Thread.Sleep(5000);
+                Thread.Sleep(1000);
 
                 counter++;
             }
+            IsTrackListEnded = true;
+            _manualResetEvent.Set();
         }
 
         private void DancingPeople()

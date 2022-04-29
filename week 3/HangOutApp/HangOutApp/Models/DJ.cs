@@ -15,7 +15,7 @@ namespace HangOutApp.Models
             Random random = new Random();
             trackList = new List<Music>();
 
-            for (int i = 0; i < 15; i++)
+            for (int i = 0; i < 2; i++)
             {
                 trackList.Add(
                     new Music
