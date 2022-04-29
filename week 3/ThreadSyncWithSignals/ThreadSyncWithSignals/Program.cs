@@ -14,10 +14,13 @@
  * Thread 2 set signal 
  * Thread 6 received an auto signal, continue working
  */
-if (System.Diagnostics.Process.GetProcessesByName(
-        System.IO.Path.GetFileNameWithoutExtension(
-            System.Reflection.Assembly.GetEntryAssembly().Location)).Count() > 1) 
-    System.Diagnostics.Process.GetCurrentProcess().Kill();
+
+Mutex mutex = new System.Threading.Mutex(true, "MyApplicationMutexName",out bool created);
+if (!created)
+{
+    Console.WriteLine("Application is already running!");
+    return;
+}
 
 ManualResetEvent _manualResetEvent = new ManualResetEvent(false);
 AutoResetEvent _autoResetEvent = new AutoResetEvent(false);
@@ -45,6 +48,7 @@ thread5.Start();
 Thread.Sleep(20);
 thread6.Start();
 
+Console.ReadKey();
 
 void ManualSignal(ManualResetEvent manualResetEvent)
 {
@@ -53,7 +57,7 @@ void ManualSignal(ManualResetEvent manualResetEvent)
     Thread.Sleep(1100);
     Console.WriteLine(Thread.CurrentThread.Name + " set signal!");
     manualResetEvent.Set();
-    
+
     Thread.Sleep(200);
     manualResetEvent.Reset();
     Console.WriteLine(Thread.CurrentThread.Name + " reset signal!");
