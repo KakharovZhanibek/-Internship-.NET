@@ -18,19 +18,19 @@ Student_SurName NVARCHAR(100) NOT NULL,
 CREATE TABLE Lessons(
 Lesson_Id INT PRIMARY KEY IDENTITY,
 Lesson_Name NVARCHAR(100) NOT NULL,
-Course_Id INT FOREIGN KEY REFERENCES Courses(Course_Id)
+Course_Id INT FOREIGN KEY REFERENCES Courses(Course_Id) NOT NULL
 )
 
 CREATE TABLE StudentsCourses(
 Student_Course_Id INT PRIMARY KEY IDENTITY,
-Student_Id INT FOREIGN KEY REFERENCES Students(Student_Id),
-Course_Id INT FOREIGN KEY REFERENCES Courses(Course_Id)
+Student_Id INT FOREIGN KEY REFERENCES Students(Student_Id) NOT NULL,
+Course_Id INT FOREIGN KEY REFERENCES Courses(Course_Id) NOT NULL 
 )
 
 CREATE TABLE StudentsLessonsScores(
-StudentLessonId INT PRIMARY KEY IDENTITY,
-StudentId INT FOREIGN KEY REFERENCES Students(Student_Id),
-LessonId INT FOREIGN KEY REFERENCES Lessons(Lesson_Id),
+Student_Lesson_Id INT PRIMARY KEY IDENTITY,
+Student_Id INT FOREIGN KEY REFERENCES Students(Student_Id) NOT NULL,
+Lesson_Id INT FOREIGN KEY REFERENCES Lessons(Lesson_Id) NOT NULL,
 Score INT NOT NULL CHECK(Score>=0 AND Score<=100)
 )
 
@@ -91,9 +91,14 @@ INSERT INTO StudentsLessonsScores VALUES(2,10,75)
 INSERT INTO StudentsLessonsScores VALUES(2,11,70)
 INSERT INTO StudentsLessonsScores VALUES(2,12,84)
 
+SELECT * FROM Teachers
+SELECT * FROM Students
+SELECT * FROM Courses
+SELECT * FROM Lessons
+
 SELECT s.Student_Name,l.Lesson_Name,sls.Score 
 FROM students s, Lessons l, StudentsLessonsScores sls 
-WHERE s.Student_Id=sls.StudentId and l.Lesson_Id=sls.LessonId
+WHERE s.Student_Id=sls.Student_Id and l.Lesson_Id=sls.Lesson_Id
 
 SELECT s.Student_Name,c.Course_Name,AVG(sls.Score) as CourseScore
 FROM students s, Lessons l, StudentsLessonsScores sls, Courses c
